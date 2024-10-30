@@ -3,60 +3,25 @@ import './App.scss';
 import cn from 'classnames';
 import { useState } from 'react';
 
-export const goodsFromServer = [
-  'Dumplings',
-  'Carrot',
-  'Eggs',
-  'Ice cream',
-  'Apple',
-  'Bread',
-  'Fish',
-  'Honey',
-  'Jam',
-  'Garlic',
-];
-
-const SORT_BY_CHAR = 'SORT_BY_CHAR';
-const SORT_BY_LENGTH = 'SORT_BY_LENGTH';
-
-const Goods = ({ goods }) => (
-  <ul>
-    {goods.map(el => (
-      <li data-cy="Good" key={el}>
-        {el}
-      </li>
-    ))}
-  </ul>
-);
-
-const sortGoods = (goods, sortType = '', isReverse = false) => {
-  if (!sortType && isReverse) return [...goods].reverse();
-
-  const sortedGoods = [...goods].sort((a, b) => {
-    switch (sortType) {
-      case SORT_BY_CHAR:
-        return isReverse ? b.localeCompare(a) : a.localeCompare(b);
-
-      case SORT_BY_LENGTH:
-        // return isReverse ? b.length - a.length : a.length - b.length;
-
-        return a.length - b.length;
-
-      default:
-        return 0;
-    }
-  });
-
-  return isReverse && sortType === SORT_BY_LENGTH
-    ? sortedGoods.reverse()
-    : sortedGoods;
-};
+import {
+  SORT_BY_CHAR,
+  SORT_BY_LENGTH,
+  SORT_BY_DEFAULT,
+} from './utils/constants';
+import GoodsList from './components/GoodsList/GoodsList';
+import sortGoods from './utils/sort/sortGoods';
+import goodsFromServer from './db/goods.json';
 
 export const App = () => {
-  const [sortType, setSortType] = useState('');
+  const [sortType, setSortType] = useState(SORT_BY_DEFAULT);
   const [isReverse, setReverse] = useState(false);
 
   const goods = sortGoods(goodsFromServer, sortType, isReverse);
+
+  const handleReset = () => {
+    setSortType('');
+    setReverse(false);
+  };
 
   return (
     <div className="section content">
@@ -93,21 +58,18 @@ export const App = () => {
           Reverse
         </button>
 
-        {(sortType !== '' || isReverse) && (
+        {(sortType.length || isReverse) && (
           <button
             type="button"
             className="button is-danger is-light"
-            onClick={() => {
-              setSortType('');
-              setReverse(false);
-            }}
+            onClick={handleReset}
           >
             Reset
           </button>
         )}
       </div>
 
-      <Goods goods={goods} />
+      <GoodsList goods={goods} />
     </div>
   );
 };
